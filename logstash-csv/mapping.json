@@ -1,0 +1,18 @@
+{
+    "bus": {
+        "properties": {
+           "linha": {
+              "type": "string"
+           },
+           "datahora": {
+              "type": "date"
+           },
+           "velocidade": {
+              "type": "double"
+           },
+           "localizacao": {
+              "type": "geo_point"
+           }
+        }
+     }
+  } 
