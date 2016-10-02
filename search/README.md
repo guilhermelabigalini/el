@@ -1,4 +1,4 @@
-# Elasticsearch product search app
+# Elasticsearch product search application based in React/Jquery and Spring boot
 
 ### Support aggregations
 [![Build Status](docs/agg.png)
