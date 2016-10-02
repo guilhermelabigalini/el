@@ -1,0 +1,400 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>Search</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.theme.min.css"/>
+
+        <link href="content/site.css" rel="stylesheet" />
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-dom.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.16/browser.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/remarkable/1.6.2/remarkable.min.js"></script>
+    </head>
+    <body>
+        <span id="search-ui-span">
+        </span>
+
+        <script type="text/babel">
+            
+            var SearchHeader = React.createClass({
+                render: function() {
+                    if (this.props.Header.Total > 0) {
+                        return (
+                            <h6>Found <b>{this.props.Header.Total}</b> items in <b>{this.props.Header.Took}</b> ms.</h6>
+                        );
+                    } if (this.props.Header.Took > 0) {
+                        return ( 
+                            <h6>Search didn't found any result.</h6>
+                        );
+                    } else {
+                        return ( <div/> );
+                    }
+                }
+            });
+            
+            var SearchFilter = React.createClass({
+                handleRemoveFilter: function(e, Field) {
+                    e.preventDefault();
+                    
+                    console.log('removing filter: ' + Field); 
+                    
+                    this.props.onRemoveFilter(Field);
+                },
+                
+                render: function() {
+                    
+                    var allFilters = null;
+                    var self = this;
+                    
+                    if (this.props.Filters != undefined && this.props.Filters != null) {
+                            allFilters = this.props.Filters.map(function(filter) {
+                            return (
+                                <span key={filter.Field} className="label label-success" role="button" onClick={(e) => self.handleRemoveFilter(e, filter.Field) }>
+                                    {filter.Field} ({filter.KeyDescription}) <span className="glyphicon glyphicon-remove"></span>
+                                </span>
+                            );
+                        });
+                    }
+                    
+                    return (
+                            <div> Filters: {allFilters}</div>
+                    );
+                }
+            });
+            
+            var SearchBar = React.createClass({
+                componentDidMount: function() {
+                    var self = this;
+                    
+                    $(this.searchtext).autocomplete ({
+                        source: function(request, response) {
+                            var input = self.searchtext.value;
+                            $.ajax(  {
+                                type: 'GET',
+                                url: '/api/v1/search?query=' + input,
+                                success: function (data) {
+                                    console.log(data);
+                                    response(data);
+                                },
+                                dataType: 'json'
+                            });
+                        },
+                        select: function( event, ui ) {  
+                            console.log( ui.item.value);
+                            self.props.onSearchSubmit(ui.item.value);
+                        }
+                    });
+                },
+                
+                handleSubmit: function(e) {
+                    e.preventDefault();
+                    
+                    var query = this.searchtext.value;
+
+                    console.log('searching for: ' + query);                    
+                    
+                    this.props.onSearchSubmit(query);
+                },
+  
+                render: function() {
+                  return (
+                    <form onSubmit={this.handleSubmit}>
+                        <div className="input-group">
+                            <input className="form-control" autofocus type="search" ref={(ref) => this.searchtext = ref} placeholder="Search for..." />
+                            <span className="input-group-btn">
+                                <button className="btn btn-default btn-search" type="submit"><i className="glyphicon glyphicon-search"></i></button>
+                            </span>
+                        </div>
+                    </form>
+                  );
+                }
+            });
+            
+            var SearchResultAggs = React.createClass({
+                handleSelectFilter: function(e, fieldName, key, field, keyDesc) {
+                    e.preventDefault();
+                    
+                    console.log('adding filter by ' + fieldName + ' for value ' + key);
+                    
+                    this.props.onSelectFilter({
+                        fieldName: fieldName,
+                        key: key,
+                        field: field,
+                        keyDesc: keyDesc
+                    });
+                },
+                
+                render: function() {
+                    
+                    var self = this;
+                    
+                    var items = this.props.Aggs.map(function(aggItem) {
+                        return (
+                            <div key={aggItem.Field}>
+                                <h4>Items by {aggItem.Field}</h4>
+                                <ul className="category-list">
+                                {aggItem.Keys.map(function(aggField) {
+                                    // remove label-primary label if not selected 
+                                    return (<li key={aggField.KeyDescription}><span className="label-primary label">
+                                        <a href="#" onClick={(e) => self.handleSelectFilter(e, aggItem.FieldName, aggField.Key, aggItem.Field, aggField.KeyDescription) }>{aggField.KeyDescription}</a></span> ({aggField.Total})
+                                    </li>)
+                                })}
+                                </ul>
+                            </div>
+                        );
+                    });
+                    
+                    return (
+                        <div>
+                        {items}
+                        </div>
+                    );
+                }
+            });
+            
+            var SearchResultGrid = React.createClass({
+                render: function() {
+
+                    var items = this.props.Items.map(function(item) {
+                        return (
+                            <SearchResultRow item={item} key={item.Id} >
+                            </SearchResultRow>
+                        );
+                    });
+
+                    return (
+                        <div className="row margin-bottom-small">
+                            {items}
+                        </div>
+                    );
+                }
+            });
+            
+            var SearchResultRow = React.createClass({
+                render: function() {
+                  return (
+                        <div className="col-md-12">
+                            <div className="row">
+                                <div className="col-md-12">
+                                    <h3>{this.props.item.ProductName}</h3>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-md-12">
+                                    <pre>
+                                    {JSON.stringify(this.props.item, null, 2) }
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+                  );
+                }
+            });
+            
+            var SearchController = React.createClass({
+                getInitialState: function() {
+                   
+                    return {
+                        Filters: [],
+                        SearchResult: {
+                            Header: {
+                                Total: 0,
+                                Took: 0
+                            }, 
+                            Items: [
+                            ],
+                            Aggregations: [
+                            ]
+                        }
+                    };
+                },
+                
+                executeSearch: function() {
+                    console.log('starting search');
+                    $.ajax({
+                        url: '/api/v1/search',
+                        dataType: 'json',
+                        type: 'POST',
+                        contentType:'application/json',
+                        data: JSON.stringify(this.searchRequest),
+                        success: function(data) {
+                          console.log(data);
+                          var oldstate = this.state;
+                          console.log('old state');
+                          console.log(oldstate);
+                          this.setState({ 
+                              Filters: oldstate.Filters,
+                              SearchResult: data
+                          });
+                        }.bind(this),
+                        error: function(xhr, status, err) {
+                          console.error(this.props.url, status, err.toString());
+                        }.bind(this)
+                    });
+                }, 
+                
+                handleRemoveFilter: function(filter) {
+                    console.log('handling remove filter: ');   
+                    console.log(filter);
+                                    
+                    for (var i = 0; i < this.state.Filters.length; i++) {
+                        if (this.state.Filters[i].Field.toUpperCase() == filter.toUpperCase()) {
+                            this.state.Filters.splice(i, 1);
+                        }
+                    }
+                    
+                    for (var i = 0; i < this.searchRequest.Filters.length; i++) {
+                        if (this.searchRequest.Filters[i].Field.toUpperCase() == filter.toUpperCase()) {
+                            this.searchRequest.Filters.splice(i, 1);
+                        }
+                    }
+                    
+                    console.log('after removed');
+                    console.log(this.state.Filters);
+                    console.log(this.searchRequest.Filters);
+                    
+                    this.executeSearch();
+                },
+                
+                handleSelectFilter: function(filter) {
+                    console.log('handling filter: ');   
+                    console.log(filter);
+                    
+                    console.log(this.searchRequest);
+                    
+                    if (this.searchRequest.Filters == undefined
+                            || this.searchRequest.Filters == null) {
+                        this.searchRequest.Filters = [];
+                    }
+                    console.log(this.state);
+                    
+                    this.state.Filters.push(
+                            { 
+                                Field: filter.field, 
+                                KeyDescription: filter.keyDesc
+                            }
+                    );
+            
+                    this.searchRequest.Filters.push(
+                            { 
+                                Field: filter.fieldName, 
+                                Value: filter.key
+                            }
+                    );
+            
+                    this.executeSearch();
+                }, 
+                
+                handleSearchSubmit: function(query) {
+                    console.log('handling query: ' + query);   
+                    /*
+                    {
+                      "Query": "123",
+                      "filters": [
+                        {
+                          "field": "StatusID",
+                          "value": 32
+                        },
+                        {
+                          "field": "StatusID",
+                          "value": 32
+                        }
+                      ]
+                    }
+                     */
+                    
+                    this.state.Filters = [];
+                    var searchRequest = {
+                        Query: query
+                    };
+                    
+                    this.searchRequest = searchRequest;
+                    
+                    this.executeSearch();
+                }, 
+                
+                render: function() { return (
+                        <div className="container margin-top margin-bottom">
+                            <div className="row margin-bottom-small">
+                                <div className="col-md-12" id="search-div">
+                                    <SearchBar onSearchSubmit={this.handleSearchSubmit}  />
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-md-12" id="search-result-header">
+                                    <SearchHeader Header={this.state.SearchResult.Header} />
+                                    <SearchFilter Filters={this.state.Filters} onRemoveFilter={this.handleRemoveFilter} />
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-sm-2 col-xs-3" id="search-result-aggs"> 
+                                    <SearchResultAggs Aggs={this.state.SearchResult.Aggregations} onSelectFilter={this.handleSelectFilter} />
+                                </div>
+                                <div className="col-xs-9 col-sm-offset-1" id="search-result-items">
+                                   <SearchResultGrid Items={this.state.SearchResult.Items} />
+                                </div>
+                            </div>
+                        </div>
+                )}
+            });
+            
+            /*
+            var header = {
+                Total: 123,
+                Took: 10
+            };
+            
+            var items = [
+                {BarCode: "R123456789", AccountCodeLevel1: "ON123", AlternateCode: "ALT CODE 01"},
+                {BarCode: "RPOIUYTRQQ", AccountCodeLevel1: "ON456", AlternateCode: "ALT CODE 02"}
+            ];
+
+            var agg = [
+                {Field: "Status", FieldName: "ItemStatusID", Keys: [
+                    {Key: "32", KeyDescription: "In", Total: 1212},
+                    {Key: "48", KeyDescription: "Out", Total: 54},
+                    {Key: "80", KeyDescription: "Pending", Total: 7}
+                ]},
+                {Field: "Class", FieldName: "ItemClassID",  Keys: [
+                    {Key: "2", KeyDescription: "Box", Total: 234},
+                    {Key: "3", KeyDescription: "File", Total: 5458}
+                ]}
+            ];
+            
+            ReactDOM.render(
+                <SearchBar />,
+                document.getElementById('search-div')
+            );
+        
+            ReactDOM.render(
+                <SearchResultGrid Items={items} />,
+                document.getElementById('search-result-items')
+            );
+    
+            ReactDOM.render(
+                <SearchResultAggs Aggs={agg} />,
+                document.getElementById('search-result-aggs')
+            );
+
+            ReactDOM.render(
+                <SearchHeader Header={header} />,
+                document.getElementById('search-result-header')
+            );*/
+            
+            ReactDOM.render(
+                <SearchController />,
+                document.getElementById('search-ui-span')
+            );
+
+            
+        </script>
+    </body>
+</html>

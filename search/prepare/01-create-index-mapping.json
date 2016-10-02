@@ -1,0 +1,46 @@
+{
+  "mappings": {
+    "document": {
+      "properties": {
+        "productName": {
+          "type": "string",
+          "index": "analyzed"
+        },
+        "description": {
+          "type": "string",
+          "index": "analyzed"
+        },
+        "brand": {
+          "type": "string",
+          "index": "analyzed"
+        },
+        "category": {
+          "type": "string",
+          "index": "analyzed"
+        },
+        "price": {
+          "type": "float"
+        },        
+        "releaseDate": {
+          "type": "date",
+		  "format" : "YYYY-mm-dd"
+        },
+		
+		/*
+		1-new
+		2-used 
+		3-refurbished
+		*/
+        "condition": {
+          "type": "integer"
+        },
+        "rating": {
+          "type": "integer"
+        },
+		"productName_suggest" : {
+          "type" :     "completion"
+        }
+      }
+    }
+  }
+}

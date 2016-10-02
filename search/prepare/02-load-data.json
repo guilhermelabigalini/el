@@ -1,0 +1,31 @@
+{ "index" : { "_index" : "product", "_type" : "document" } }
+{"productName" : "MacBook Pro", "productName_suggest" : "MacBook Pro", "category" : "Laptop", "brand" : "Apple", "rating" : 9, "price" :  1299.00, "releaseDate" : "2005-02-01", "condition": "1" }
+
+{ "index" : { "_index" : "product", "_type" : "document" } }
+{"productName" : "MacBook Air", "productName_suggest" : "MacBook Air",  "category" : "Laptop", "brand" : "Apple",  "rating" : 8,  "price" :  1099.00, "releaseDate" : "2006-05-01", "condition": "1"}
+
+{ "index" : { "_index" : "product", "_type" : "document" } }
+{"productName" : "ATIV Book", "productName_suggest" : "ATIV Book",  "category" : "Laptop",  "brand" : "Samsung",  "rating" : 8,  "price" :  1899.00,  "releaseDate" : "2014-05-01", "condition": "1"}
+
+{ "index" : { "_index" : "product", "_type" : "document" } }
+{"productName" : "Super Book", "productName_suggest" : "Super Book",  "category" : "Laptop",  "brand" : "Samsung",  "rating" : 6,  "price" :  2400.00,  "releaseDate" : "2016-05-01", "condition": "1"}
+
+{ "index" : { "_index" : "product", "_type" : "document" } }
+{"productName" : "Inspiron", "productName_suggest" : "Inspiron",  "category" : "Laptop",  "brand" : "Dell",  "rating" : 6,  "price" :  700.00,   "releaseDate" : "2008-03-01", "condition": "2"}
+
+{ "index" : { "_index" : "product", "_type" : "document" } }
+{"productName" : "Ipad","productName_suggest" : "Ipad",  "category" : "Tablet",  "brand" : "Apple",  "rating" : 9,  "price" :  600.00,  "releaseDate" : "2005-07-01", "condition": "2"}
+
+{ "index" : { "_index" : "product", "_type" : "document" } }
+{"productName" : "Galaxy Tab","productName_suggest" : "Galaxy Tab",  "category" : "Tablet",  "brand" : "Samsung",  "rating" : 8,  "price" :  550.00,  "releaseDate" : "2007-07-01", "condition": "2"}
+
+{ "index" : { "_index" : "product", "_type" : "document" } }
+{"productName" : "Lumia", "productName_suggest" : "Lumia",  "category" : "Mobile",  "brand" : "Nokia",  "rating" : 6,  "price" :  50.00, "releaseDate" : "2009-03-01", "condition": "3"}
+
+{ "index" : { "_index" : "product", "_type" : "document" } }
+{"productName" : "Iphone", "productName_suggest" : "Iphone",  "category" : "Mobile", "brand" : "Apple",  "rating" : 8,  "price" :  60.00,  "releaseDate" : "2002-03-01", "condition": "3"}
+
+{ "index" : { "_index" : "product", "_type" : "document" } }
+{"productName" : "Xperia", "productName_suggest" : "Xperia",  "category" : "Mobile",  "brand" : "Sony",  "rating" : 8,  "price" :  70.00,  "releaseDate" : "2004-03-01", "condition": "3"}
+
+

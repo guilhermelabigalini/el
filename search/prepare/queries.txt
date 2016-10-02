@@ -1,0 +1,140 @@
+POST http://localhost:9200/product/_suggest
+{
+  "product-suggest": {
+    "text": "m",
+    "completion": {
+      "field": "productName_suggest"
+    }
+  }
+}	
+
+
+POST http://localhost:9200/product/document/_search
+{
+  "size" : 10,
+  "query" : {
+    "match" : {
+      "_all" : {
+        "query" : "Laptop",
+        "type" : "boolean"
+      }
+    }
+  },
+  "aggregations" : {
+    "condition" : {
+      "terms" : {
+        "field" : "condition"
+      }
+    },
+    "category" : {
+      "terms" : {
+        "field" : "category"
+      }
+    },
+    "brand" : {
+      "terms" : {
+        "field" : "brand"
+      }
+    },
+	"releaseDate" : {
+		"date_histogram" : {
+			"field" : "releaseDate",
+			"interval" : "year",
+			"min_doc_count" : 1
+		}
+	},
+	"price_by_interval" : {
+		"histogram" : {
+			"field": "price",
+			"interval" : 100,
+			"min_doc_count" : 1
+		}
+	},
+	"price_by_range" : {
+		"range" : {
+			"field": "price",
+			"ranges" : [
+				{ "to" : 1000 },
+				{ "from" : 1000, "to" : 1500 },
+				{ "from" : 1500 }
+			]
+		}
+	}
+  }
+}
+
+==> Drill down to price range '1000-1500'
+
+POST http://localhost:9200/product/document/_search
+{
+  "size": 10,
+  "query": {
+    "bool": {
+      "must": {
+        "match": {
+          "_all": {
+            "query": "Laptop",
+            "type": "boolean"
+          }
+        }
+      },
+      "filter": {
+        "range": {
+          "price": {
+            "gte": 1000,
+            "lte": 1500,
+            "boost": 2
+          }
+        }
+      }
+    }
+  },
+  "aggregations": {
+    "condition": {
+      "terms": {
+        "field": "condition"
+      }
+    },
+    "category": {
+      "terms": {
+        "field": "category"
+      }
+    }
+  }
+}
+
+==> Drill down to brand 'apple'
+
+POST http://localhost:9200/product/document/_search
+{
+  "size" : 10,
+  "query" : {
+    "bool" : {
+      "must" : {
+        "match" : {
+          "_all" : {
+            "query" : "Laptop",
+            "type" : "boolean"
+          }
+        }
+      },
+      "filter" : {
+        "term" : {
+          "brand" : "apple"
+        }
+      }
+    }
+  },
+  "aggregations" : {
+    "condition" : {
+      "terms" : {
+        "field" : "condition"
+      }
+    },
+    "category" : {
+      "terms" : {
+        "field" : "category"
+      }
+    }
+  }
+}
